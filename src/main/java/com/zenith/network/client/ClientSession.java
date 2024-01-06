@@ -3,6 +3,9 @@ package com.zenith.network.client;
 import com.github.steveice10.packetlib.packet.PacketProtocol;
 import com.github.steveice10.packetlib.tcp.TcpClientSession;
 import com.zenith.Proxy;
+import com.zenith.network.netty.ZenithClientInboundChannelHandler;
+import com.zenith.network.netty.ZenithClientOutboundChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -30,6 +33,13 @@ public class ClientSession extends TcpClientSession {
         super(host, port, bindAddress, 0, protocol);
         this.proxy = proxy;
         this.addListener(new ClientListener(this));
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        ctx.pipeline().addAfter("manager", "zenith-client-in", new ZenithClientInboundChannelHandler(this));
+        ctx.pipeline().addBefore("manager", "zenith-client-out", new ZenithClientOutboundChannelHandler(this));
+        super.channelActive(ctx);
     }
 
     @Override

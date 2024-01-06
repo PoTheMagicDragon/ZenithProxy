@@ -6,7 +6,6 @@ import com.github.steveice10.packetlib.packet.Packet;
 import com.zenith.Proxy;
 import com.zenith.event.proxy.ConnectEvent;
 import com.zenith.event.proxy.DisconnectEvent;
-import com.zenith.network.server.ServerConnection;
 import com.zenith.util.ComponentSerializer;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
@@ -21,27 +20,15 @@ import static java.util.Objects.isNull;
 public record ClientListener(@NonNull ClientSession session) implements SessionListener {
     @Override
     public void packetReceived(Session session, Packet packet) {
-        try {
-            Packet p = CLIENT_HANDLERS.handleInbound(packet, this.session);
-            if (p != null) {
-                for (ServerConnection connection : Proxy.getInstance().getActiveConnections()) {
-                    connection.sendAsync(packet); // sends on each connection's own event loop
-                }
-            }
-        } catch (Exception e) {
-            CLIENT_LOG.error("", e);
-            throw new RuntimeException(e);
-        }
+        // todo: deprecated
+        // moved to ZenithClientInboundChannelHandler
     }
 
     @Override
     public Packet packetSending(final Session session, final Packet packet) {
-        try {
-            return CLIENT_HANDLERS.handleOutgoing(packet, this.session);
-        } catch (Exception e) {
-            CLIENT_LOG.error("", e);
-            throw new RuntimeException(e);
-        }
+        // todo: deprecated
+        // moved to ZenithClientOutboundChannelHandler
+        return packet;
     }
 
     @Override
