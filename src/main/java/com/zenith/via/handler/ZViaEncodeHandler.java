@@ -5,13 +5,11 @@ import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.exception.CancelEncoderException;
 import com.zenith.network.client.ClientSession;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 
 import java.util.List;
 
-@ChannelHandler.Sharable
 public class ZViaEncodeHandler extends MessageToMessageEncoder<ByteBuf> {
     private final UserConnection info;
     private final ClientSession client;
@@ -38,13 +36,8 @@ public class ZViaEncodeHandler extends MessageToMessageEncoder<ByteBuf> {
                 transformedBuf.release();
             }
         } catch (final Exception e) {
-            if (e instanceof CancelCodecException) {
-                out.add(bytebuf.retain());
-                return;
-            }
-            if (!this.client.callPacketError(e))
-                throw e;
+            if (e instanceof CancelCodecException || this.client.callPacketError(e)) return;
+            throw e;
         }
-
     }
 }
